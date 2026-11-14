@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123c32">
+<title>Afia Shop Management</title>
+<style>
+:root{--green:#123c32;--mint:#e8f3ee;--ink:#17231f;--muted:#68756f;--line:#dce5df;--red:#b42318;--amber:#946200}
+*{box-sizing:border-box}body{margin:0;background:#f4f7f5;color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif}
+header{background:var(--green);color:white;padding:18px 16px;position:sticky;top:0;z-index:5}
+header h1{font-size:20px;margin:0}header p{margin:4px 0 0;color:#d4e7de;font-size:12px}
+nav{display:flex;gap:7px;overflow:auto;padding:10px;background:white;border-bottom:1px solid var(--line);position:sticky;top:67px;z-index:4}
+nav button{white-space:nowrap;border:0;background:#edf2ef;color:var(--green);padding:9px 12px;border-radius:20px;font-weight:650}
+nav button.active{background:var(--green);color:white}
+main{max-width:1050px;margin:auto;padding:14px}
+.page{display:none}.page.active{display:block}
+h2{font-size:19px;margin:8px 0 14px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card,.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.metric small{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:23px;margin-top:5px}
+label{font-size:13px;color:#34443d;display:block;margin:10px 0 5px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #cbd8d0;border-radius:9px;font:inherit;background:white;color:var(--ink)}
+button.primary{background:var(--green);color:white;border:0;padding:11px 15px;border-radius:9px;font-weight:700;margin-top:12px}
+button.secondary{background:var(--mint);color:var(--green);border:0;padding:9px 12px;border-radius:9px;font-weight:650}
+button.danger{background:#fff0ef;color:var(--red);border:0;padding:7px 10px;border-radius:8px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hint{color:var(--muted);font-size:12px;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:9px 7px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:650}
+.tablewrap{overflow:auto}.status{font-size:11px;padding:4px 7px;border-radius:20px;background:var(--mint);color:var(--green);white-space:nowrap}.status.zero{background:#ffebe9;color:var(--red)}.status.low{background:#fff4d6;color:var(--amber)}
+.actions{display:flex;gap:7px;flex-wrap:wrap}.empty{padding:18px;text-align:center;color:var(--muted)}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.layout{display:grid;grid-template-columns:1fr 1fr;gap:12px}}
+</style>
+</head>
+<body>
+<header><h1>Afia Furniture & Crockeries</h1><p>দোকানের সম্পূর্ণ হিসাব ব্যবস্থাপনা</p></header>
+<nav id="nav">
+<button class="active" data-page="home">ড্যাশবোর্ড</button><button data-page="customers">কাস্টমার</button>
+<button data-page="products">স্টক / পণ্য</button><button data-page="sales">বিক্রি</button>
+<button data-page="purchases">মাল কেনা</button><button data-page="cash">ক্যাশ</button><button data-page="reports">রিপোর্ট</button><button data-page="backup">ব্যাকআপ</button>
+</nav>
+<main>
+<section id="home" class="page active">
+<h2>আজকের হিসাব</h2><div class="grid">
+<div class="card metric"><small>হাতে নগদ ক্যাশ</small><strong id="mCash">৳০</strong></div>
+<div class="card metric"><small>আজকের বিক্রি</small><strong id="mSales">৳০</strong></div>
+<div class="card metric"><small>কাস্টমারের কাছে বাকি</small><strong id="mDue">৳০</strong></div>
+<div class="card metric"><small>সাপ্লায়ারের কাছে দেনা</small><strong id="mPayable">৳০</strong></div>
+</div>
+<div class="layout"><div class="panel"><h3>আজকের সারাংশ</h3><p>আজ বিক্রির লেনদেন: <b id="todayCount">০</b></p><p>আজ মাল কেনা: <b id="todayBuy">৳০</b></p><p>স্টক শেষ পণ্য: <b id="zeroCount">০</b></p></div>
+<div class="panel"><h3>স্টক সতর্কতা</h3><div id="stockAlerts" class="hint">এখনো কোনো পণ্য যোগ করা হয়নি।</div></div></div>
+</section>
+<section id="customers" class="page"><h2>কাস্টমার ও বাকি হিসাব</h2>
+<div class="panel"><h3>নতুন কাস্টমার যোগ</h3><div class="row"><div><label>নাম *</label><input id="cName" placeholder="কাস্টমারের নাম"></div><div><label>মোবাইল নম্বর</label><input id="cPhone" inputmode="tel" placeholder="01XXXXXXXXX"></div></div><label>ঠিকানা</label><input id="cAddress" placeholder="ঠিকানা"><button class="primary" onclick="addCustomer()">কাস্টমার সংরক্ষণ</button></div>
+<div class="panel"><h3>কাস্টমারের তালিকা</h3><input id="cSearch" placeholder="নাম বা নম্বর দিয়ে খুঁজুন" oninput="renderCustomers()"><div id="customerList"></div></div>
+<div class="panel"><h3>বাকি আদায় / পেমেন্ট যোগ</h3><label>কাস্টমার</label><select id="payCustomer"></select><div class="row"><div><label>টাকার পরিমাণ</label><input id="payAmount" type="number" min="0" step=".01"></div><div><label>তারিখ</label><input id="payDate" type="date"></div></div><label>নোট</label><input id="payNote" placeholder="যেমন: আগের বাকি পরিশোধ"><button class="primary" onclick="receivePayment()">টাকা জমা নাও</button><p class="hint">এখানে জমা দিলে কাস্টমারের বাকি কমবে এবং ক্যাশ বাড়বে।</p></div>
+</section>
+<section id="products" class="page"><h2>পণ্য ও স্টক ব্যবস্থাপনা</h2>
+<div class="panel"><h3>নতুন পণ্য যোগ</h3><div class="row"><div><label>পণ্যের নাম *</label><input id="pName" placeholder="যেমন: সিলভারের হাঁড়ি"></div><div><label>ক্যাটাগরি</label><input id="pCategory" placeholder="হাঁড়ি-পাতিল / ফার্নিচার"></div></div>
+<div class="row"><div><label>একক</label><select id="pUnit"><option value="পিস">পিস</option><option value="কেজি">কেজি</option><option value="সেট">সেট</option><option value="লিটার">লিটার</option><option value="ডজন">ডজন</option></select></div><div><label>শুরুর স্টক</label><input id="pQty" type="number" min="0" step=".001" value="0"></div></div>
+<div class="row"><div><label>ক্রয়মূল্য (প্রতি একক)</label><input id="pCost" type="number" min="0" step=".01" value="0"></div><div><label>বিক্রয়মূল্য (প্রতি একক)</label><input id="pPrice" type="number" min="0" step=".01" value="0"></div></div><button class="primary" onclick="addProduct()">পণ্য সংরক্ষণ</button></div>
+<div class="panel"><h3>বর্তমান স্টক</h3><input id="pSearch" placeholder="পণ্য খুঁজুন" oninput="renderProducts()"><div id="productList"></div></div>
+</section>
+<section id="sales" class="page"><h2>আজকের বিক্রি যোগ</h2><div class="panel">
+<label>পণ্য</label><select id="sProduct" onchange="showSaleUnit()"></select><div class="row"><div><label>পরিমাণ (<span id="saleUnit">একক</span>)</label><input id="sQty" type="number" min=".001" step=".001" value="1"></div><div><label>প্রতি এককের বিক্রয়মূল্য</label><input id="sPrice" type="number" min="0" step=".01"></div></div>
+<label>কাস্টমার (ঐচ্ছিক)</label><select id="sCustomer"></select><div class="row"><div><label>এখন নগদ পেয়েছি</label><input id="sPaid" type="number" min="0" step=".01" value="0"></div><div><label>তারিখ</label><input id="sDate" type="date"></div></div><label>নোট</label><input id="sNote" placeholder="বিক্রির বিবরণ"><button class="primary" onclick="addSale()">বিক্রি সংরক্ষণ</button><p class="hint">বাকি অংশ নির্বাচিত কাস্টমারের হিসাবে যোগ হবে। কাস্টমার না দিলে বাকি তৈরি হবে না।</p></div><div class="panel"><h3>বিক্রির খাতা</h3><div id="salesList"></div></div>
+</section>
+<section id="purchases" class="page"><h2>মাল কেনার হিসাব</h2><div class="panel">
+<label>পণ্য</label><select id="bProduct"></select><div class="row"><div><label>পরিমাণ</label><input id="bQty" type="number" min=".001" step=".001" value="1"></div><div><label>প্রতি এককের ক্রয়মূল্য</label><input id="bCost" type="number" min="0" step=".01"></div></div>
+<div class="row"><div><label>সাপ্লায়ারের নাম</label><input id="bSupplier" placeholder="নাম"></div><div><label>সাপ্লায়ারের ফোন</label><input id="bPhone" placeholder="মোবাইল নম্বর"></div></div>
+<div class="row"><div><label>এখন পরিশোধ</label><input id="bPaid" type="number" min="0" step=".01" value="0"></div><div><label>তারিখ</label><input id="bDate" type="date"></div></div><button class="primary" onclick="addPurchase()">কেনা সংরক্ষণ ও স্টক বাড়াও</button></div><div class="panel"><h3>কেনাকাটার খাতা</h3><div id="purchaseList"></div></div>
+</section>
+<section id="cash" class="page"><h2>ক্যাশ খাতা</h2><div class="panel"><h3>অন্যান্য ক্যাশ জমা / খরচ</h3><div class="row"><div><label>ধরন</label><select id="cashType"><option value="in">ক্যাশ জমা</option><option value="out">ক্যাশ খরচ</option></select></div><div><label>পরিমাণ</label><input id="cashAmount" type="number" min=".01" step=".01"></div></div><label>কারণ</label><input id="cashNote" placeholder="যেমন: দোকান ভাড়া / মালিকের জমা"><label>তারিখ</label><input id="cashDate" type="date"><button class="primary" onclick="addCash()">ক্যাশ খাতায় যোগ</button></div><div class="panel"><h3>ক্যাশ লেনদেন</h3><div id="cashList"></div></div></section>
+<section id="reports" class="page"><h2>রিপোর্ট</h2><div class="panel"><label>রিপোর্টের তারিখ</label><div class="row"><input id="rFrom" type="date"><input id="rTo" type="date"></div><button class="secondary" onclick="renderReports()">রিপোর্ট দেখাও</button><div id="reportResult"></div></div></section>
+<section id="backup" class="page"><h2>ডেটা ব্যাকআপ</h2><div class="panel"><p>এই ডিভাইসের ব্রাউজারে হিসাব সংরক্ষিত থাকবে। ফোন বদলানোর আগে ব্যাকআপ ডাউনলোড করে রাখো।</p><div class="actions"><button class="primary" onclick="exportData()">ব্যাকআপ ডাউনলোড</button><label class="secondary" style="padding:10px;border-radius:9px">ব্যাকআপ ফিরিয়ে আনো <input type="file" id="importFile" accept="application/json" onchange="importData(event)" style="display:block;margin-top:6px"></label></div><p class="hint">গুরুত্বপূর্ণ: ব্রাউজারের ডেটা মুছে ফেললে ব্যাকআপ ছাড়া হিসাব হারিয়ে যেতে পারে। একই ডেটা একাধিক ডিভাইসে শেয়ার করতে অনলাইন সার্ভার/ডেটাবেস যুক্ত করতে হবে।</p></div></section>
+</main>
+<script>
+const KEY='afia_shop_v1';
+let db=JSON.parse(localStorage.getItem(KEY)||'null')||{customers:[],products:[],sales:[],purchases:[],cash:[],payments:[]};
+const today=()=>new Date().toLocaleDateString('en-CA');
+['payDate','sDate','bDate','cashDate','rTo'].forEach(id=>document.getElementById(id).value=today());
+document.getElementById('rFrom').value=new Date(Date.now()-6*86400000).toLocaleDateString('en-CA');
+function save(){localStorage.setItem(KEY,JSON.stringify(db));renderAll()}
+function money(n){return '৳'+(Number(n)||0).toLocaleString('en-BD',{maximumFractionDigits:2})}
+function num(id){return Number(document.getElementById(id).value)||0}
+function val(id){return document.getElementById(id).value.trim()}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function totalDue(){return db.customers.reduce((a,c)=>a+c.due,0)}
+function supplierDue(){return db.purchases.reduce((a,p)=>a+p.total-p.paid,0)}
+function cashBalance(){return db.cash.reduce((a,x)=>a+(x.type==='in'?x.amount:-x.amount),0)+db.sales.reduce((a,x)=>a+x.paid,0)+db.payments.reduce((a,x)=>a+x.amount,0)-db.purchases.reduce((a,x)=>a+x.paid,0)}
+function addCustomer(){let name=val('cName');if(!name)return alert('কাস্টমারের নাম লিখুন');db.customers.push({id:id(),name,phone:val('cPhone'),address:val('cAddress'),due:0});['cName','cPhone','cAddress'].forEach(x=>document.getElementById(x).value='');save()}
+function addProduct(){let name=val('pName');if(!name)return alert('পণ্যের নাম লিখুন');db.products.push({id:id(),name,category:val('pCategory'),unit:val('pUnit'),qty:num('pQty'),cost:num('pCost'),price:num('pPrice')});['pName','pCategory'].forEach(x=>document.getElementById(x).value='');document.getElementById('pQty').value=0;save()}
+function addSale(){let p=db.products.find(x=>x.id===val('sProduct')),q=num('sQty'),price=num('sPrice'),paid=num('sPaid'),c=db.customers.find(x=>x.id===val('sCustomer'));if(!p)return alert('আগে পণ্য যোগ করুন');if(q<=0||q>p.qty)return alert('স্টকে পর্যাপ্ত মাল নেই');let total=q*price;if(paid>total)return alert('জমা টাকা মোট দামের বেশি হতে পারবে না');if(total>paid&&!c)return alert('বাকি রাখতে হলে কাস্টমার নির্বাচন করুন');p.qty-=q;if(c)c.due+=total-paid;db.sales.unshift({id:id(),date:val('sDate')||today(),product:p.name,qty:q,unit:p.unit,price,total,paid,customer:c?.name||'নগদ বিক্রি',due:total-paid,note:val('sNote')});document.getElementById('sQty').value=1;document.getElementById('sPaid').value=0;save();alert('বিক্রি সংরক্ষণ হয়েছে')}
+function addPurchase(){let p=db.products.find(x=>x.id===val('bProduct')),q=num('bQty'),cost=num('bCost'),paid=num('bPaid');if(!p)return alert('আগে পণ্য যোগ করুন');if(q<=0)return alert('সঠিক পরিমাণ দিন');let total=q*cost;if(paid>total)return alert('পরিশোধ মোট দামের বেশি');p.qty+=q;p.cost=cost;db.purchases.unshift({id:id(),date:val('bDate')||today(),product:p.name,qty:q,unit:p.unit,cost,total,paid,supplier:val('bSupplier'),phone:val('bPhone')});document.getElementById('bQty').value=1;save();alert('মাল কেনা সংরক্ষণ হয়েছে, স্টক বেড়েছে')}
+function receivePayment(){let c=db.customers.find(x=>x.id===val('payCustomer')),amount=num('payAmount');if(!c||amount<=0)return alert('কাস্টমার ও টাকার পরিমাণ দিন');if(amount>c.due)return alert('এই কাস্টমারের বাকি টাকার চেয়ে বেশি');c.due-=amount;db.payments.unshift({date:val('payDate')||today(),customer:c.name,amount,note:val('payNote')});document.getElementById('payAmount').value='';save();alert('টাকা জমা হয়েছে')}
+function addCash(){let amount=num('cashAmount');if(amount<=0)return alert('টাকার পরিমাণ দিন');db.cash.unshift({date:val('cashDate')||today(),type:val('cashType'),amount,note:val('cashNote')});document.getElementById('cashAmount').value='';save()}
+function renderCustomers(){let q=val('cSearch').toLowerCase();let rows=db.customers.filter(c=>(c.name+c.phone).toLowerCase().includes(q));document.getElementById('customerList').innerHTML=rows.length?`<div class="tablewrap"><table><tr><th>নাম / ফোন</th><th>বাকি</th><th>যোগাযোগ</th></tr>${rows.map(c=>`<tr><td><b>${esc(c.name)}</b><br>${esc(c.phone)}<br><small>${esc(c.address)}</small></td><td>${money(c.due)}</td><td>${c.phone?`<a href="tel:${esc(c.phone)}">কল</a>`:'—'}</td></tr>`).join('')}</table></div>`:'<div class="empty">কাস্টমার নেই</div>'}
+function renderProducts(){let q=val('pSearch').toLowerCase(),rows=db.products.filter(p=>(p.name+p.category).toLowerCase().includes(q));document.getElementById('productList').innerHTML=rows.length?`<div class="tablewrap"><table><tr><th>পণ্য</th><th>স্টক</th><th>দাম</th><th>অবস্থা</th></tr>${rows.map(p=>`<tr><td><b>${esc(p.name)}</b><br><small>${esc(p.category)}</small></td><td>${p.qty} ${esc(p.unit)}</td><td>${money(p.price)}</td><td>${p.qty<=0?'<span class="status zero">মাল শেষ</span>':p.qty<=3?'<span class="status low">স্টক কম</span>':'<span class="status">আছে</span>'}</td></tr>`).join('')}</table></div>`:'<div class="empty">পণ্য নেই</div>'}
+function fillSelect(id,items,label){let el=document.getElementById(id),old=el.value;el.innerHTML='<option value="">নির্বাচন করুন</option>'+items.map(x=>`<option value="${x.id}">${esc(label(x))}</option>`).join('');if(items.some(x=>x.id===old))el.value=old}
+function renderLists(){fillSelect('payCustomer',db.customers,c=>c.name+' — বাকি '+money(c.due));fillSelect('sCustomer',db.customers,c=>c.name);fillSelect('sProduct',db.products,p=>p.name+' ('+p.qty+' '+p.unit+')');fillSelect('bProduct',db.products,p=>p.name+' ('+p.unit+')');
+document.getElementById('salesList').innerHTML=db.sales.length?table(db.sales.map(x=>[x.date,x.product,`${x.qty} ${x.unit}`,money(x.total),`${esc(x.customer)} / বাকি ${money(x.due)}`]),['তারিখ','পণ্য','পরিমাণ','মোট','কাস্টমার']):'<div class="empty">বিক্রির রেকর্ড নেই</div>';
+document.getElementById('purchaseList').innerHTML=db.purchases.length?table(db.purchases.map(x=>[x.date,x.product,`${x.qty} ${x.unit}`,money(x.total),esc(x.supplier||'—'),`বাকি ${money(x.total-x.paid)}`]),['তারিখ','পণ্য','পরিমাণ','মোট','সাপ্লায়ার','দেনা']):'<div class="empty">কেনার রেকর্ড নেই</div>';
+document.getElementById('cashList').innerHTML=db.cash.length?table(db.cash.map(x=>[x.date,x.type==='in'?'জমা':'খরচ',money(x.amount),esc(x.note)]),['তারিখ','ধরন','টাকা','বিবরণ']):'<div class="empty">ক্যাশ লেনদেন নেই</div>'}
+function table(rows,heads){return `<div class="tablewrap"><table><tr>${heads.map(h=>`<th>${h}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table></div>`}
+function renderHome(){document.getElementById('mCash').textContent=money(cashBalance());document.getElementById('mSales').textContent=money(db.sales.filter(x=>x.date===today()).reduce((a,x)=>a+x.total,0));document.getElementById('mDue').textContent=money(totalDue());document.getElementById('mPayable').textContent=money(supplierDue());document.getElementById('todayCount').textContent=db.sales.filter(x=>x.date===today()).length;document.getElementById('todayBuy').textContent=money(db.purchases.filter(x=>x.date===today()).reduce((a,x)=>a+x.total,0));let z=db.products.filter(p=>p.qty<=0);document.getElementById('zeroCount').textContent=z.length;document.getElementById('stockAlerts').innerHTML=z.length?z.map(p=>`<p><span class="status zero">মাল শেষ</span> ${esc(p.name)}</p>`).join(''):'শূন্য স্টক নেই।'}
+function showSaleUnit(){let p=db.products.find(x=>x.id===val('sProduct'));document.getElementById('saleUnit').textContent=p?.unit||'একক';if(p)document.getElementById('sPrice').value=p.price}
+function renderReports(){let a=val('rFrom'),b=val('rTo'),ss=db.sales.filter(x=>x.date>=a&&x.date<=b),pp=db.purchases.filter(x=>x.date>=a&&x.date<=b);let total=ss.reduce((n,x)=>n+x.total,0),buy=pp.reduce((n,x)=>n+x.total,0),received=ss.reduce((n,x)=>n+x.paid,0)+db.payments.filter(x=>x.date>=a&&x.date<=b).reduce((n,x)=>n+x.amount,0);document.getElementById('reportResult').innerHTML=`<hr><p>মোট বিক্রি: <b>${money(total)}</b></p><p>মোট মাল কেনা: <b>${money(buy)}</b></p><p>বিক্রিতে নগদ পেয়েছ: <b>${money(received)}</b></p><p>এই সময়ের বিক্রির বাকি: <b>${money(ss.reduce((n,x)=>n+x.due,0))}</b></p><p>বর্তমান কাস্টমার বাকি: <b>${money(totalDue())}</b></p><p class="hint">এটি বিক্রি ও কেনার সারাংশ; প্রকৃত লাভ নির্ভুল করতে প্রতিটি পণ্যের ক্রয়মূল্য, খরচ ও অন্যান্য সমন্বয় ঠিকভাবে রাখতে হবে।</p>`}
+function renderAll(){renderHome();renderCustomers();renderProducts();renderLists();renderReports()}
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='afia-shop-backup-'+today()+'.json';a.click();URL.revokeObjectURL(a.href)}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.customers||!x.products)throw 0;if(confirm('বর্তমান হিসাবের বদলে ব্যাকআপের হিসাব বসাবেন?')){db=x;save();alert('ব্যাকআপ ফিরিয়ে আনা হয়েছে')}}catch(_){alert('ব্যাকআপ ফাইলটি সঠিক নয়')}};r.readAsText(f)}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.page).classList.add('active')});
+renderAll();
+</script></body></html>
